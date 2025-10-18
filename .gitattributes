@@ -3,4 +3,5 @@
 *.tar.gz filter=lfs diff=lfs merge=lfs -text
 *zip filter=lfs diff=lfs merge=lfs -text
 RoomOfConformations filter=lfs diff=lfs merge=lfs -text
+*.pyz filter=lfs diff=lfs merge=lfs -text
 *.pkg filter=lfs diff=lfs merge=lfs -text
