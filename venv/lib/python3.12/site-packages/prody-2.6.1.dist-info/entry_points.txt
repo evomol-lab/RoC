@@ -1,0 +1,3 @@
+[console_scripts]
+evol = prody.apps:evol_main
+prody = prody.apps:prody_main

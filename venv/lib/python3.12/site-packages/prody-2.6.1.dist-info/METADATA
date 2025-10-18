@@ -1,0 +1,30 @@
+Metadata-Version: 2.4
+Name: ProDy
+Version: 2.6.1
+Summary: A Python Package for Protein Dynamics Analysis
+Author: Karolina Mikulska-Ruminska, She Zhang, Hongchun Li, Cihan Kaya, Ahmet Bakan, and others
+Author-email: James Krieger <jamesmkrieger@gmail.com>
+License: MIT License
+Project-URL: Homepage, http://www.bahargroup.org/prody
+Project-URL: Documentation, http://www.bahargroup.org/prody/tutorials.html
+Project-URL: Source, https://github.com/prody/ProDy
+Project-URL: CondaForge, https://conda.anaconda.org/conda-forge
+Keywords: protein,dynamics,elastic network model,Gaussian network model,anisotropic network model,essential dynamics analysis,principal component analysis,Protein Data Bank,PDB,GNM,ANM,SM,PCA
+Classifier: Development Status :: 5 - Production/Stable
+Classifier: Intended Audience :: Education
+Classifier: Intended Audience :: Science/Research
+Classifier: License :: OSI Approved :: MIT License
+Classifier: Operating System :: MacOS
+Classifier: Operating System :: POSIX
+Classifier: Programming Language :: Python
+Classifier: Programming Language :: Python :: 3
+Classifier: Topic :: Scientific/Engineering :: Bio-Informatics
+Classifier: Topic :: Scientific/Engineering :: Chemistry
+Requires-Python: >=3.10
+Description-Content-Type: text/x-rst
+License-File: LICENSE.rst
+Requires-Dist: numpy>=1.10
+Requires-Dist: biopython
+Requires-Dist: pyparsing<=3.1.1
+Requires-Dist: scipy
+Dynamic: license-file
