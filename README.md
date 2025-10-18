@@ -34,6 +34,8 @@ Developed by the EvoMol-Lab - [BioME](http://bioinfo.imd.ufrn.br) - [UFRN](https
 
 - **Local Processing:** All calculations run on your own machine, ensuring your data remains private and secure.
 
+- **GoogleColab:** You can also use our GoogleColab option [HERE](https://colab.research.google.com/drive/1jd3qgAZPF9bWxlcCjYURpFQAEYW102Y5?usp=sharing). 
+
 ## Screenshots
 
 **Main Window:**
