@@ -1,6 +1,6 @@
 <div align="center">
 
-<img src="RoC-Logo.png" width="300" alt="The Room of Conformations Logo">
+<img src="https://github.com/jpmslima/RoC/blob/main/RoC-Logo.png" width="300" alt="The Room of Conformations Logo">
 
 </div>
 
