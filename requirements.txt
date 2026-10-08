@@ -1,0 +1,9 @@
+# The Room of Conformations: runtime dependencies (versions tested with RoC 2.0).
+#   pip install -r requirements.txt
+prody==2.6.1
+MDAnalysis==2.10.0
+numpy==2.5.3
+scipy==1.18.1
+flask==3.1.3
+# Optional, only for the ClustENM method (ANM sampling + OpenMM minimisation):
+#   pip install openmm==8.6.1 pdbfixer==1.12.0

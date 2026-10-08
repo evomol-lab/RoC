@@ -1,0 +1,26 @@
+# Jobs of the web interface and command-line results
+roc_jobs/
+roc_results/
+
+# Python environments and caches
+.venv/
+venv/
+env/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+
+# Builds: PyInstaller (build/, dist/) and Apptainer images. Publish executables as
+# GitHub releases instead of committing them.
+build/
+dist/
+*.sif
+/RoC-v*
+
+# Local files that are not part of RoC
+model0/
+
+# Editors and operating systems
+.offline-markdown-preview/
+.DS_Store
+*.swp

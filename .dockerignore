@@ -1,0 +1,24 @@
+# Build context of the RoC image: only what the Dockerfile copies.
+#
+# Everything is excluded first and the needed files are allowed back in, so new files
+# never reach the image by accident. Excluded this way, among others: .git/, .venv/,
+# roc_jobs/ (web-interface jobs, can be gigabytes), model0/, Examples/, screenshots/,
+# build/, dist/, *.sif, RoC-Logo.png, EvoMol.png, RoCGUI.spec, Apptainer.def,
+# pyproject.toml and the development container settings.
+*
+
+!requirements.txt
+!roc.py
+!RoCGUI.py
+!DOCUMENTATION.md
+!README.md
+!LICENSE.txt
+!templates
+!templates/**
+!static
+!static/**
+
+# never inside the allowed folders either
+**/__pycache__
+**/*.py[cod]
+**/.DS_Store

@@ -22,6 +22,8 @@
 
 	"features": {
     "ghcr.io/devcontainers/features/git-lfs:1": {}
-}
+},
+	"postCreateCommand": "pip3 install --user -r requirements.txt",
+	"forwardPorts": [5050]
 }
 

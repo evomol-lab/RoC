@@ -6,215 +6,165 @@
 
 # The Room of Conformations
 
-A user-friendly desktop tool for generating all-atom protein conformational ensembles using Normal Mode Analysis.
+All-atom protein conformational ensembles from elastic network normal modes, in a local web
+interface.
 
-**The Room of Conformations (RoC)** is a standalone application designed to make protein dynamics analysis accessible to everyone. It uses the power of [**ProDy**](http://www.bahargroup.org/prody/ "null") and [**MDAnalysis**](https://www.mdanalysis.org/ "null") to calculate and reconstruct plausible protein movements, all wrapped in a simple graphical user interface.
-
-No command-line expertise, Python installation, or server access is required. Just download, click, and run.
+**The Room of Conformations (RoC)** generates plausible conformations of a protein, and of its
+ligands, by moving it along its softest collective motions. It uses [**ProDy**](http://www.bahargroup.org/prody/)
+for the elastic network models and [**MDAnalysis**](https://www.mdanalysis.org/) for the analysis,
+and it explains its choices: how many modes to use, what each mode does, and how good the
+resulting models are. It is a local, open replacement for web servers such as
+[NMSim](https://doi.org/10.1093/nar/gks478): your structures never leave your computer.
 
 <div>
 
-<img src="EvoMol.png" width="100" alt="The Room of Conformations Logo">
+<img src="EvoMol.png" width="100" alt="EvoMol-Lab logo">
 
 </div>
 
 Developed by the EvoMol-Lab - [BioME](http://bioinfo.imd.ufrn.br) - [UFRN](https://ufrn.br/en).
 
-## Key Features
+## What's new in 2.0
 
-- **Simple Graphical Interface:** No more complex scripts. Just point, click, and generate.
-
-- **Standalone Executable:** No need to install Python or any dependencies. Everything is bundled together.
-
-- **Cross-Platform:** Works on Linux, Windows, and macOS.
-
-- **All-Atom Ensembles:** Generates high-quality, all-atom ensembles while preserving local secondary structures.
-
-- **Automatic Analysis:** Instantly calculates and displays interactive RMSD and RMSF plots for your generated ensemble.
-
-- **Local Processing:** All calculations run on your own machine, ensuring your data remains private and secure.
-
-- **GoogleColab:** You can also use our GoogleColab option [HERE](https://colab.research.google.com/drive/1jd3qgAZPF9bWxlcCjYURpFQAEYW102Y5?usp=sharing). 
+- **Web interface** (Flask, in the style of [Sauron](https://github.com/jpmslima/Sauron)) with
+  progress, cancellation, interactive charts and 3D viewers (3Dmol.js), plus a command line.
+- **Correct all-atom reconstruction.** RoC 1.x moved only the C-alpha atoms: all other atoms stayed
+  at their input positions, so backbone bonds were stretched by several ångströms (N–CA up to 7.7 Å
+  in the example ensemble). Every residue is now moved as a rigid body; ensembles made with 1.x
+  should be regenerated.
+- **Three network models**: C-alpha ANM (uniform or structure-based springs), RTB with rigid
+  residues or secondary-structure blocks on all heavy atoms, and ProDy's ClustENM with OpenMM
+  energy minimisation (optional). GNM is used to check the network against B-factors and to find
+  hinges.
+- **Help with the number of modes**: share of the fluctuation, collectivity of each mode, mobility
+  profiles, a mode explorer that animates every mode, and, given a second conformation of the same
+  protein, the overlap of the modes with the real conformational change.
+- **Ligands and ions** are recognised, listed with their pockets, and either follow their binding
+  site, become part of the network, or are removed. mmCIF input, ions named `CA`, insertion codes,
+  modified residues, nucleic acids and multi-model files are handled.
+- **Quality report and analysis**: peptide-bond deviations, new steric overlaps, RMSD, RMSF, radius
+  of gyration, pairwise RMSD with cluster representatives, Ramachandran plot.
 
 ## Screenshots
 
-**Main Window:**
-![RoC - Main Window](Main.png)
+**Input and parameters**
+![RoC - main window](screenshots/main.png)
 
-**Plots visualization:**
-![RoC - Plots Visualization](Results.png)
+**Choosing the number of modes**
+![RoC - normal modes](screenshots/modes.png)
 
-## How to Use (Installation-Free)
+**Ensemble and quality report**
+![RoC - ensemble](screenshots/ensemble.png)
 
-1. **Download:** Go to the [**Releases**](https://www.google.com/search?q=https://github.com/your-username/your-repo/releases "null") page of this repository.
+## Installation and use
 
-2. **Select Your OS:** Download the appropriate file for your operating system (e.g., `RoomOfConformations_Linux.zip`, `RoomOfConformations_Windows.zip`, or `RoomOfConformations_macOS.zip`).
-
-3. **Unzip & Run:**
-   
-   - **Windows:** Unzip the file and double-click `RoomOfConformations.exe`.
-   
-   - **macOS:** Unzip the file and double-click the `RoomOfConformations.app`. You may need to right-click > "Open" the first time to approve the application.
-   
-   - **Linux:** Unzip the file, open a terminal, navigate to the folder, make the file executable with `chmod +x RoomOfConformations`, and run it with `./RoomOfConformations`.
-
-4. **Using the App:**
-   
-   - Click **"Browse..."** to select your input PDB file.
-   
-   - Click the second **"Browse..."** to choose a name and location for your output ensemble file.
-   
-   - Adjust the **Number of Conformations** and **Number of Modes** as needed.
-
-   - If desired, check the options to save interactive Plotly plots in html files and `.csv` files with the RMSD and RMSF data.
-   
-   - Click **"Run Ensemble Generation"**. The analysis will start, and you can monitor the progress in the log window.
-   
-   - Once complete, interactive plots for RMSD and RMSF will open in another window, and the final PDB ensemble file will be saved to your chosen location.
-
-## How It Works
-
-The application follows a robust hybrid workflow to generate the ensemble:
-
-1. **Coarse-Graining (ProDy):** An Anisotropic Network Model (ANM) is built using only the Cα atoms of your protein. This allows for the efficient calculation of low-frequency normal modes, which represent large-scale, collective protein motions.
-
-2. **Sampling (ProDy):** A Cα-only ensemble is generated by creating new structures through random displacements along the softest normal modes.
-
-3. **Reconstruction (MDAnalysis):** For each conformation in the Cα ensemble, the full all-atom structure is rigidly superimposed onto the new Cα positions. This robustly reconstructs the detailed atomic model while preserving the original bond lengths, angles, and secondary structures.
-
-4. **Output:** A multi-model PDB file containing the final all-atom ensemble is written, ready for visualization or further analysis.
-
-## For Developers (Building from Source)
-
-If you wish to modify the code or build the executable yourself, follow these steps.
-
-**1. Prerequisites:**
-
-- Python 3.9+
-
-**2. Setup a Virtual Environment:**
+**1. Install** (Python 3.10 or newer):
 
 ```
-# Create a virtual environment
-python3 -m venv venv
-
-# Activate it
-# On Linux/macOS:
-source venv/bin/activate
-# On Windows:
-.\venv\Scripts\activate
+python3 -m venv .venv
+source .venv/bin/activate          # Windows: .venv\Scripts\activate
+pip install -r requirements.txt
+pip install openmm pdbfixer        # optional, only for the ClustENM method
 ```
 
-**3. Install Dependencies:**
+or, with conda:
 
 ```
-pip install prody MDAnalysis plotly Pillow pyinstaller
+conda create -n roc -c conda-forge python=3.12 pip
+conda activate roc
+pip install -r requirements.txt openmm pdbfixer
 ```
 
-**4. Run the App from Source:**
+Use a dedicated environment: installing the pinned NumPy/SciPy with pip into the Anaconda
+`base` environment mixes pip and conda builds and can break other packages (e.g. h5py).
+
+**2. Run the web interface:**
 
 ```
-python RoomOfConformations.py
+python RoCGUI.py
 ```
 
-5. Build the Standalone Executable:
+and open <http://127.0.0.1:5050>. Upload a structure (or fetch it from the PDB or AlphaFold DB),
+click **Analyze modes** to choose the number of modes, then **Generate ensemble**. Everything is
+explained in the **Documentation** tab ([DOCUMENTATION.md](DOCUMENTATION.md)).
 
-Make sure RoomOfConformations.py and RoC-Logo.png are in your directory.
+**Command line:**
 
-- **On Linux / macOS:**
-  
-  ```
-  pyinstaller --onefile --windowed --add-data "RoC-Logo.png:." RoomOfConformations.py
-  ```
+```
+python roc.py structure.pdb --outdir results --method rtb --modes 10 --confs 100 --rmsd 1.0
+python roc.py apo.pdb --outdir results --analyze-only --target holo.pdb
+python roc.py --help
+```
 
-- **On Windows:**
-  
-  ```
-  pyinstaller --onefile --windowed --add-data "RoC-Logo.png;." RoomOfConformations.py
-  ```
+**Containers:**
 
-The final executable will be located in the `dist/` folder.
+```
+podman build -t roc .                      # or docker build
+podman run --rm -p 5050:5050 roc           # web interface on http://localhost:5050
+apptainer build roc.sif Apptainer.def
+```
+
+**Google Colab:** you can also use our Google Colab notebook
+[HERE](https://colab.research.google.com/drive/1jd3qgAZPF9bWxlcCjYURpFQAEYW102Y5?usp=sharing).
+
+## How it works
+
+1. **Network (ProDy).** The structure is read (PDB or mmCIF), waters are removed and every residue
+   is classified. An elastic network is built: one node per C-alpha atom (ANM) or all heavy atoms
+   with rigid residues or secondary-structure blocks (RTB). Its normal modes are computed.
+2. **Modes.** The modes are described (share of the fluctuation, collectivity, B-factor agreement,
+   hinges, overlap with a second conformation) to choose how many to use.
+3. **Sampling.** Each conformation is a random combination of the slowest *M* modes with amplitudes
+   proportional to 1/√λ (as in NMSim and ProDy's `sampleModes`), scaled to the requested average
+   C-alpha RMSD. Alternatively each mode can be traversed on its own.
+4. **Reconstruction.** Every residue, ligand and ion is moved as a rigid body fitted to its displaced
+   network nodes, so the geometry inside residues and ligands is preserved.
+5. **Analysis (MDAnalysis).** RMSD, RMSF, radius of gyration, pairwise RMSD and representatives,
+   Ramachandran angles, peptide-bond and steric-overlap checks.
+
+### How many modes?
+
+The number of modes does **not** set how much the protein moves (the RMSD does); it sets how many
+directions the motion is spread over. Because amplitudes scale with 1/√λ, the slowest modes
+dominate. 1–3 modes give the dominant global motions, 5–20 the usual collective space for ensembles
+(default 15), more modes add local fluctuations. **Analyze modes** shows the evidence for your
+structure; with a second conformation (e.g. apo and holo forms) it shows directly how many modes
+the real change needs. For adenylate kinase (4AKE → 1AKE), mode 1 alone has an overlap of 0.80
+with the closure and 10 modes reach 0.97. Details in [DOCUMENTATION.md](DOCUMENTATION.md#how-many-modes).
+
+## Building a standalone executable
+
+```
+pip install pyinstaller
+pyinstaller RoCGUI.spec
+```
+
+The executable is written to `dist/`; it starts the server and opens the browser. The ClustENM
+method is not bundled (it needs OpenMM). Publish executables as GitHub releases rather than
+committing them (`build/` and `dist/` are ignored by git).
+
+The previous desktop application (Tkinter, RoC 1.x) was removed in 2.0 because of the
+reconstruction problem described above; it remains in the git history.
 
 ## Citing
 
 If you use **The Room of Conformations** in your published research, please cite this repository.
 
-Furthermore, please remember to cite the essential underlying libraries that make this tool possible:
+Please also cite the libraries and methods that make it possible:
 
-- **ProDy:**
-  
-  > Bakan, A, Meireles, LM, Bahar, I. (2011) ProDy: Protein Dynamics Inferred from Theory and Experiments. *Bioinformatics* 27(11):1575-1577.
+- **ProDy:** Bakan A, Meireles LM, Bahar I (2011) ProDy: protein dynamics inferred from theory and
+  experiments. *Bioinformatics* 27:1575–1577; Zhang S *et al.* (2021) ProDy 2.0. *Bioinformatics*
+  37:3657–3659.
+- **MDAnalysis:** Michaud-Agrawal N, Denning EJ, Woolf TB, Beckstein O (2011) *J Comput Chem*
+  32:2319–2327; Gowers RJ *et al.* (2016) *Proc 15th Python in Science Conf*, 98–105.
+- **ANM:** Atilgan AR *et al.* (2001) *Biophys J* 80:505–515. **RTB:** Tama F *et al.* (2000)
+  *Proteins* 41:1–7. **ClustENM:** Kurkcuoglu Z, Bahar I, Doruker P (2016) *J Chem Theory Comput*
+  12:4549–4562.
 
-- **MDAnalysis:**
-  
-  > R. J. Gowers, M. Linke, J. Barnoud, T. J. E. Reddy, M. N. Melo, S. L. Seyler, D. L. Dotson, J. Domanski, S. Buchoux, I. M. Kenney, and O. Beckstein. MDAnalysis: A Python package for the rapid analysis of molecular dynamics simulations. In S. Benthall and S. Rostrup, editors, *Proceedings of the 15th Python in Science Conference*, pages 98-105, Austin, TX, 2016. SciPy.
+The full list of references is in [DOCUMENTATION.md](DOCUMENTATION.md#references).
 
 ## License
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE.txt) file for details.
-
-## Third-Party Library Acknowledgements
-
-This application is built using several fantastic open-source libraries. In accordance with their licenses, we are providing their original copyright notices here.
-
-#### ProDy
-
-- **License:** MIT License
-
-- **Copyright:** (c) 2010-2022, ProDy Development Team
-
-The MIT License (MIT)
-
-Copyright (c) 2010-2022, ProDy Development Team
-
-Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
-
-The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
-
-#### MDAnalysis
-
-- **License:** GNU Lesser General Public License v2.1 (LGPL-2.1)
-
-- **Copyright:** (c) 2008-2022, MDAnalysis Development Team
-
-MDAnalysis is free software; you can redistribute it and/or modify it under the terms of the GNU Lesser General Public License as published by the Free Software Foundation; either version 2.1 of the License, or (at your option) any later version.
-
-This library is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU Lesser General Public License for more details.
-
-#### Plotly
-
-- **License:** MIT License
-
-- **Copyright:** (c) 2022 Plotly, Inc.
-
-The MIT License (MIT)
-
-Copyright (c) 2022 Plotly, Inc.
-
-Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
-
-The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
-
-#### Pillow (PIL Fork)
-
-- **License:** Historical Permission Notice and Disclaimer (HPND)
-
-- **Copyright:** (c) 1997-2011 by Secret Labs AB, (c) 1995-2011 by Fredrik Lundh
-
-The Python Imaging Library (PIL) is
-
-Copyright © 1997-2011 by Secret Labs AB
-
-Copyright © 1995-2011 by Fredrik Lundh
-
-By obtaining, using, and/or copying this software and/or its associated documentation, you agree that you have read, understood, and will comply with the following terms and conditions:
-
-Permission to use, copy, modify, and distribute this software and its associated documentation for any purpose and without fee is hereby granted, provided that the above copyright notice appears in all copies, and that both that copyright notice and this permission notice appear in supporting documentation, and that the name of Secret Labs AB or the author not be used in advertising or publicity pertaining to distribution of the software without specific, written prior permission.
-
-#### PyInstaller
-
-- **License:** GNU General Public License v2.0 (GPL-2.0) with a special "bootloader exception".
-
-- **Copyright:** (c) 2013-2022, PyInstaller Development Team.
-
-PyInstaller is licensed under the GPL license, but with a special exception that allows you to distribute your bundled application under your own license. The programs created by PyInstaller are not considered derivative works of PyInstaller.
+Third-party libraries and their licenses are listed in
+[THIRD_PARTY_LICENSES.md](THIRD_PARTY_LICENSES.md).

@@ -1,0 +1,450 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>The Room of Conformations</title>
+    <link rel="icon" type="image/png" href="{{ url_for('static', filename='roc-logo.png') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/3dmol@2.4.2/build/3Dmol-min.js"></script>
+    <script src="https://cdn.plot.ly/plotly-2.32.0.min.js" charset="utf-8"></script>
+    <script src="https://cdn.jsdelivr.net/npm/marked@4.3.0/marked.min.js"></script>
+</head>
+
+<body>
+    <div class="background-orbs">
+        <div class="orb orb-1"></div>
+        <div class="orb orb-2"></div>
+    </div>
+
+    <button class="theme-toggle" id="theme-toggle" title="Toggle light/dark mode" aria-label="Toggle light/dark mode">
+        <svg id="theme-icon-light" style="display: none;" width="24" height="24" viewBox="0 0 24 24" fill="none"
+            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="5"></circle>
+            <line x1="12" y1="1" x2="12" y2="3"></line>
+            <line x1="12" y1="21" x2="12" y2="23"></line>
+            <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+            <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+            <line x1="1" y1="12" x2="3" y2="12"></line>
+            <line x1="21" y1="12" x2="23" y2="12"></line>
+            <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+            <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+        </svg>
+        <svg id="theme-icon-dark" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+            stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+        </svg>
+    </button>
+
+    <div class="container glass-panel">
+        <header>
+            <div class="logo-container">
+                <img src="{{ url_for('static', filename='roc-logo.png') }}" alt="The Room of Conformations logo">
+            </div>
+            <h1 class="app-title">The Room of Conformations</h1>
+            <p class="subtitle">All-atom conformational ensembles from elastic network normal modes</p>
+            <nav class="app-nav">
+                <button type="button" class="app-nav-btn active" id="nav-calculator">Calculator</button>
+                <button type="button" class="app-nav-btn" id="nav-documentation">Documentation</button>
+            </nav>
+        </header>
+
+        <main id="calculator-view">
+            <form id="roc-form" autocomplete="off">
+                <!-- 1. Structure -->
+                <section class="form-section">
+                    <h2><span class="step-badge">1</span>Structure</h2>
+                    <div class="segmented" role="radiogroup" aria-label="Input source">
+                        <label><input type="radio" name="input_mode" value="upload" checked>Upload file</label>
+                        <label><input type="radio" name="input_mode" value="fetch">Fetch from database</label>
+                    </div>
+
+                    <div class="upload-zone" id="drop-zone" tabindex="0" role="button" aria-label="Choose a structure file">
+                        <input type="file" id="file-input" accept=".pdb,.ent,.cif,.mmcif,.gz" hidden>
+                        <svg class="upload-icon" width="44" height="44" viewBox="0 0 24 24" fill="none">
+                            <path d="M21 15V19C21 19.53 20.79 20.04 20.41 20.41C20.04 20.79 19.53 21 19 21H5C4.47 21 3.96 20.79 3.59 20.41C3.21 20.04 3 19.53 3 19V15"
+                                stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+                            <path d="M17 8L12 3L7 8" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+                            <path d="M12 3V15" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+                        </svg>
+                        <p class="upload-text">Drag &amp; drop a PDB or mmCIF file here</p>
+                        <p class="upload-subtext">or click to browse (.pdb, .cif, optionally .gz)</p>
+                        <div class="file-name-display" id="file-name">No file selected</div>
+                    </div>
+
+                    <div id="fetch-zone" style="display: none; margin-bottom: 16px;">
+                        <div class="field-grid">
+                            <div class="field">
+                                <label for="fetch_db">Database</label>
+                                <select id="fetch_db" class="input">
+                                    <option value="pdb">RCSB PDB (PDB ID)</option>
+                                    <option value="alphafold">AlphaFold DB (UniProt accession)</option>
+                                </select>
+                            </div>
+                            <div class="field">
+                                <label for="fetch_id">Identifier</label>
+                                <input type="text" id="fetch_id" class="input" placeholder="e.g. 4AKE">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="field-grid">
+                        <div class="field">
+                            <label for="chains">Chains</label>
+                            <input type="text" id="chains" class="input" placeholder="all chains (or e.g. A,B)">
+                            <span class="hint">Only these chains (and their ligands) are modelled.</span>
+                        </div>
+                        <div class="field">
+                            <label for="trim_plddt">Remove residues with pLDDT below</label>
+                            <input type="number" id="trim_plddt" class="input" min="0" max="100" step="5" placeholder="0 (keep all)">
+                            <span class="hint">For AlphaFold models: floppy, low-confidence tails otherwise dominate the slowest modes.</span>
+                        </div>
+                    </div>
+
+                    <details class="explain" id="target-details">
+                        <summary>Compare with a second conformation (optional)</summary>
+                        <p>Upload another structure of the same protein, for example the ligand-bound (holo) form.
+                            RoC superposes it on the input and measures how much of the conformational change each
+                            mode describes (overlap). This is the most direct way to decide how many modes you need.</p>
+                        <input type="file" id="target-input" class="input" accept=".pdb,.ent,.cif,.mmcif,.gz">
+                    </details>
+                </section>
+
+                <!-- 2. Model -->
+                <section class="form-section">
+                    <h2><span class="step-badge">2</span>Elastic network model</h2>
+                    <div class="field-grid">
+                        <div class="field wide">
+                            <label for="method">Method</label>
+                            <select id="method" class="input">
+                                <option value="anm" selected>ANM, C-alpha anisotropic network (fast, classic)</option>
+                                <option value="rtb">RTB, rigid residues or secondary-structure blocks on all heavy atoms</option>
+                                <option value="clustenm">ClustENM, ANM sampling + OpenMM energy minimisation (slow)</option>
+                            </select>
+                            <span class="hint" id="method-desc"></span>
+                        </div>
+                        <div class="field" id="springs-field">
+                            <label for="springs">Spring constants</label>
+                            <select id="springs" class="input">
+                                <option value="uniform" selected>Uniform (classic ANM)</option>
+                                <option value="structure">Structure-based (ProDy GammaStructureBased)</option>
+                            </select>
+                            <span class="hint">Structure-based: covalent neighbours ×10, helix and sheet contacts ×6 (Lezon &amp; Bahar 2010). Usually fewer floppy, localised modes.</span>
+                        </div>
+                        <div class="field" id="blocks-field" style="display: none;">
+                            <label for="blocks">Rigid blocks</label>
+                            <select id="blocks" class="input">
+                                <option value="residue" selected>One block per residue</option>
+                                <option value="sse">Helices and strands (DSSP) + loop residues</option>
+                            </select>
+                            <span class="hint">Secondary-structure blocks follow the rigid-cluster idea of NMSim (RCNMA).</span>
+                        </div>
+                        <div class="field">
+                            <label for="cutoff">Spring cutoff (Å)</label>
+                            <input type="number" id="cutoff" class="input" min="3" max="50" step="0.5" placeholder="15">
+                            <span class="hint">Nodes closer than this are connected by springs.</span>
+                        </div>
+                        <div class="field">
+                            <label for="gamma">Spring constant γ</label>
+                            <input type="number" id="gamma" class="input" min="0.001" step="0.1" placeholder="1.0">
+                            <span class="hint">Scales all frequencies; it does not change the modes' shapes.</span>
+                        </div>
+                    </div>
+
+                    <div class="field" style="margin-top: 16px;">
+                        <span class="field-label">Ligands and ions</span>
+                        <div class="choice-list" role="radiogroup" aria-label="Ligand handling">
+                            <label class="choice"><input type="radio" name="ligands" value="follow" checked>
+                                <div><strong>Move with the binding site</strong>
+                                    <span>Ligands are not part of the network (apo-like dynamics). In every model each
+                                        ligand is superposed rigidly on its pocket (polymer atoms within 5 Å), so it
+                                        keeps its shape and its contacts as far as the pocket allows.</span></div>
+                            </label>
+                            <label class="choice"><input type="radio" name="ligands" value="network">
+                                <div><strong>Include in the elastic network</strong>
+                                    <span>Ligand heavy atoms and ions become network nodes: they stiffen their
+                                        binding site (holo-like dynamics) and move with the modes.</span></div>
+                            </label>
+                            <label class="choice"><input type="radio" name="ligands" value="remove">
+                                <div><strong>Remove</strong>
+                                    <span>Only the macromolecule is modelled and written.</span></div>
+                            </label>
+                        </div>
+                        <span class="hint" style="margin-top: 6px;">Crystallographic waters are always removed. ClustENM always removes ligands (no force-field parameters).</span>
+                    </div>
+                </section>
+
+                <!-- 3. Sampling -->
+                <section class="form-section">
+                    <h2><span class="step-badge">3</span>Sampling</h2>
+                    <div class="field">
+                        <label for="modes-num">Number of modes</label>
+                        <div class="modes-control">
+                            <input type="range" id="modes" min="1" max="100" value="15" aria-label="Number of modes">
+                            <input type="number" id="modes-num" class="input" min="1" max="100" value="15">
+                        </div>
+                        <div class="modes-live" id="modes-live">The <strong>15</strong> slowest (lowest-frequency) modes will
+                            be combined. Run <em>Analyze modes</em> to see how much of the network's motion they capture
+                            and which motions they are.</div>
+                        <details class="explain">
+                            <summary>What does the number of modes mean?</summary>
+                            <p>A network of <em>N</em> nodes has 3<em>N</em> − 6 internal normal modes (the 6 rigid-body
+                                motions are excluded). They are sorted by frequency: the slowest modes are the softest,
+                                most collective motions (hinge bending, domain opening and closing); faster modes are
+                                increasingly local.</p>
+                            <p>Each conformation is the input plus a random combination of the first <em>M</em> modes.
+                                A mode's amplitude is drawn from a Gaussian scaled by 1/√λ (λ = eigenvalue), as in
+                                NMSim and ProDy's <code>sampleModes</code>, so the slowest modes dominate. The total
+                                amplitude is set by the average RMSD below, <strong>not</strong> by <em>M</em>:
+                                more modes spread the same deformation over more, increasingly local directions.</p>
+                            <ul>
+                                <li><strong>1–3 modes</strong>: the dominant global motions only; use to study one
+                                    mechanism, or with <em>Traverse</em> to see each mode.</li>
+                                <li><strong>5–20 modes</strong>: the usual range for ensembles (e.g. ensemble docking);
+                                    ligand-induced changes are typically well described by a handful of the slowest
+                                    modes (Tama &amp; Sanejouand 2001; Bakan &amp; Bahar 2009).</li>
+                                <li><strong>30+ modes</strong>: increasingly local, "breathing" fluctuations.</li>
+                            </ul>
+                            <p>After <em>Analyze modes</em>, the charts show the share of the network's fluctuation
+                                captured by the first <em>M</em> modes, how collective each mode is, and, with a second
+                                conformation, how much of the real change they describe. See the Documentation tab for
+                                details.</p>
+                        </details>
+                    </div>
+
+                    <div class="field-grid" style="margin-top: 16px;">
+                        <div class="field">
+                            <label for="sampling">Sampling scheme</label>
+                            <select id="sampling" class="input">
+                                <option value="random" selected>Random combination of modes</option>
+                                <option value="traverse">Traverse each mode on its own</option>
+                            </select>
+                        </div>
+                        <div class="field">
+                            <label for="confs" id="confs-label">Conformations</label>
+                            <input type="number" id="confs" class="input" min="1" max="5000" value="50">
+                        </div>
+                        <div class="field">
+                            <label for="rmsd" id="rmsd-label">Average C-alpha RMSD to the input (Å)</label>
+                            <input type="number" id="rmsd" class="input" min="0.05" max="20" step="0.1" value="1.0">
+                            <span class="hint" id="rmsd-hint">0.5–1.5 Å keeps local geometry realistic; check the quality report for larger values.</span>
+                        </div>
+                        <div class="field">
+                            <label for="seed">Random seed</label>
+                            <input type="number" id="seed" class="input" min="0" placeholder="random (recorded)">
+                        </div>
+                        <div class="field">
+                            <label for="clusters">Representative models</label>
+                            <input type="number" id="clusters" class="input" min="1" max="50" value="5">
+                            <span class="hint">Cluster medoids of the pairwise RMSD, written to a separate file.</span>
+                        </div>
+                        <div class="field" id="clustenm-gens-field" style="display: none;">
+                            <label for="clustenm_gens">ClustENM generations</label>
+                            <input type="number" id="clustenm_gens" class="input" min="1" max="5" value="1">
+                        </div>
+                    </div>
+                    <label class="toggle-switch compact" style="margin-top: 12px;">
+                        <div class="toggle-info">
+                            <span class="toggle-title">Also write one PDB file per model</span>
+                            <span class="toggle-desc">Convenient for docking programs that read one receptor per file.</span>
+                        </div>
+                        <input type="checkbox" id="split_models">
+                        <span class="slider"></span>
+                    </label>
+                    <label class="toggle-switch compact" id="clustenm-md-field" style="display: none;">
+                        <div class="toggle-info">
+                            <span class="toggle-title">ClustENM: short MD after minimisation</span>
+                            <span class="toggle-desc">15 ps of implicit-solvent MD per conformer. Much slower.</span>
+                        </div>
+                        <input type="checkbox" id="clustenm_md">
+                        <span class="slider"></span>
+                    </label>
+                </section>
+
+                <div class="btn-row">
+                    <button type="button" class="secondary-btn" id="analyze-btn" disabled>Analyze modes</button>
+                    <button type="button" class="submit-btn" id="generate-btn" disabled><span>Generate ensemble</span></button>
+                </div>
+            </form>
+
+            <div class="job-panel" id="job-panel" aria-live="polite">
+                <div class="job-head">
+                    <span id="progress-text">Starting…</span>
+                    <button type="button" class="link-btn" id="cancel-btn">Cancel</button>
+                </div>
+                <div class="progress"><div id="progress-bar"></div></div>
+                <details style="margin-top: 8px;">
+                    <summary class="hint" style="cursor: pointer;">Log</summary>
+                    <pre class="log-box" id="log-box"></pre>
+                </details>
+            </div>
+
+            <div id="error-message" class="error-message" role="alert"></div>
+
+            <!-- Results -->
+            <section class="results" id="results">
+                <div class="results-head">
+                    <h2 id="results-title">Results</h2>
+                    <a class="download-btn inline" id="zip-btn" href="#">Download all results (.zip)</a>
+                </div>
+                <div class="tabs" role="tablist">
+                    <button type="button" class="tab-btn active" data-tab="modes" role="tab">Normal modes</button>
+                    <button type="button" class="tab-btn" data-tab="ensemble" role="tab" id="tab-ensemble-btn" disabled>Ensemble</button>
+                    <button type="button" class="tab-btn" data-tab="files" role="tab">Files</button>
+                </div>
+
+                <div class="tab-pane active" id="pane-modes">
+                    <div class="tiles" id="modes-tiles"></div>
+                    <div class="callout" id="modes-guide"></div>
+                    <div class="chart-grid">
+                        <div class="chart-card">
+                            <h3>Cumulative share of the network's fluctuation</h3>
+                            <p class="chart-sub" id="cumulative-sub">Σ(1/λ) of the first M modes over all modes. The marker follows the number of modes.</p>
+                            <div class="plot" id="chart-cumulative"></div>
+                        </div>
+                        <div class="chart-card">
+                            <h3>Share of each mode</h3>
+                            <p class="chart-sub">Selected modes in color. Click a bar to select modes 1 to that mode.</p>
+                            <div class="plot" id="chart-share"></div>
+                        </div>
+                        <div class="chart-card">
+                            <h3>Collectivity of each mode</h3>
+                            <p class="chart-sub">Fraction of residues that move (Brüschweiler 1995). Below 0.15 a mode is localised: a tail or a loop, not a global motion.</p>
+                            <div class="plot" id="chart-collectivity"></div>
+                        </div>
+                        <div class="chart-card" id="mobility-card">
+                            <h3 id="mobility-title">Residue mobility</h3>
+                            <p class="chart-sub" id="mobility-sub"></p>
+                            <div class="plot" id="chart-mobility"></div>
+                        </div>
+                        <div class="chart-card" id="overlap-card" style="display: none;">
+                            <h3>Overlap with the second conformation</h3>
+                            <p class="chart-sub" id="overlap-sub"></p>
+                            <div class="plot" id="chart-overlap"></div>
+                        </div>
+                        <div class="chart-card" id="residual-card" style="display: none;">
+                            <h3>RMSD to the second conformation reachable with M modes</h3>
+                            <p class="chart-sub">C-alpha RMSD left after the best possible move along the first M modes (linear projection).</p>
+                            <div class="plot" id="chart-residual"></div>
+                        </div>
+                    </div>
+
+                    <h3 class="section-title">Mode explorer</h3>
+                    <div class="viewer-row">
+                        <div>
+                            <div class="viewer3d" id="mode-viewer"><div class="viewer-msg" id="mode-viewer-msg">Select a mode to animate it.</div></div>
+                            <div class="viewer-controls">
+                                <label for="mode-select">Mode</label>
+                                <select id="mode-select" class="input"></select>
+                                <button type="button" class="link-btn" id="mode-play">Pause</button>
+                                <span class="hint">Amplitude exaggerated to 2 Å C-alpha RMSD for clarity.</span>
+                            </div>
+                        </div>
+                        <div class="chart-card">
+                            <h3 id="mode-profile-title">Displacement profile</h3>
+                            <p class="chart-sub" id="mode-profile-sub"></p>
+                            <div class="plot" id="chart-mode-profile"></div>
+                        </div>
+                    </div>
+
+                    <details class="explain" style="margin-bottom: 20px;">
+                        <summary>Table view of the modes</summary>
+                        <div class="table-wrap" style="margin-top: 8px;">
+                            <table class="data-table" id="modes-table"></table>
+                        </div>
+                    </details>
+
+                    <div id="ligands-block" style="display: none;">
+                        <h3 class="section-title">Ligands and ions</h3>
+                        <div class="table-wrap"><table class="data-table" id="ligands-table"></table></div>
+                    </div>
+                    <h3 class="section-title" id="notes-title">Notes</h3>
+                    <ul class="notes" id="notes"></ul>
+                </div>
+
+                <div class="tab-pane" id="pane-ensemble">
+                    <div class="tiles" id="ens-tiles"></div>
+                    <div class="callout" id="qc-guide"></div>
+                    <div class="viewer-row">
+                        <div>
+                            <div class="viewer3d" id="ens-viewer"><div class="viewer-msg" id="ens-viewer-msg">Loading the ensemble…</div></div>
+                            <div class="viewer-controls">
+                                <button type="button" class="link-btn" id="ens-play">Play</button>
+                                <input type="range" id="ens-frame" min="0" max="0" value="0" aria-label="Model">
+                                <span id="ens-frame-label" class="hint">model 1</span>
+                                <select id="ens-color" class="input" aria-label="Colour">
+                                    <option value="rmsf" selected>Colour by RMSF</option>
+                                    <option value="chain">Colour by chain</option>
+                                    <option value="spectrum">Rainbow N→C</option>
+                                </select>
+                            </div>
+                            <p class="hint" id="ens-viewer-note" style="margin-top: 6px;"></p>
+                        </div>
+                        <div class="chart-card">
+                            <h3>RMSD of every model to the input</h3>
+                            <p class="chart-sub">C-alpha atoms, after superposition (MDAnalysis).</p>
+                            <div class="plot" id="chart-rmsd"></div>
+                        </div>
+                    </div>
+                    <div class="chart-grid">
+                        <div class="chart-card full">
+                            <h3>RMSF per residue</h3>
+                            <p class="chart-sub" id="rmsf-sub">C-alpha fluctuation in the ensemble, compared with the value expected from the elastic network for the selected modes.</p>
+                            <div class="plot" id="chart-rmsf"></div>
+                        </div>
+                        <div class="chart-card">
+                            <h3>Radius of gyration</h3>
+                            <p class="chart-sub">Protein atoms of every model; the line marks the input.</p>
+                            <div class="plot" id="chart-rg"></div>
+                        </div>
+                        <div class="chart-card">
+                            <h3>New steric overlaps per model</h3>
+                            <p class="chart-sub" id="clash-sub"></p>
+                            <div class="plot" id="chart-clashes"></div>
+                        </div>
+                        <div class="chart-card" id="pairwise-card">
+                            <h3>Pairwise RMSD between models</h3>
+                            <p class="chart-sub">C-alpha RMSD after superposition; used to pick the representatives.</p>
+                            <div class="plot" id="chart-pairwise" style="height: 360px;"></div>
+                        </div>
+                        <div class="chart-card" id="rama-card">
+                            <h3>Ramachandran plot</h3>
+                            <p class="chart-sub">Backbone φ/ψ of the ensemble (MDAnalysis) and of the input.</p>
+                            <div class="plot" id="chart-rama" style="height: 360px;"></div>
+                        </div>
+                    </div>
+                    <h3 class="section-title">Representative models</h3>
+                    <div class="table-wrap"><table class="data-table" id="reps-table"></table></div>
+                    <div id="ens-ligands-block" style="display: none;">
+                        <h3 class="section-title">Ligands in the ensemble</h3>
+                        <div class="table-wrap"><table class="data-table" id="ens-ligands-table"></table></div>
+                    </div>
+                </div>
+
+                <div class="tab-pane" id="pane-files">
+                    <div class="files-list" id="files-list"></div>
+                    <p class="hint">The <code>.nmd</code> file opens in VMD (NMWiz) to animate the modes. Every chart's data is in the CSV files.</p>
+                </div>
+            </section>
+        </main>
+
+        <div id="documentation-view" class="documentation-view" style="display: none;">
+            <div id="doc-content" class="doc-content">
+                <div class="doc-loading">Loading documentation…</div>
+            </div>
+        </div>
+    </div>
+
+    <footer class="app-footer">
+        <a href="http://bioinfo.imd.ufrn.br" target="_blank" rel="noopener noreferrer">
+            <img src="{{ url_for('static', filename='EvoMol-logo.png') }}" alt="EvoMol Lab logo" class="footer-logo">
+        </a>
+        <p>developed by the EvoMol-Lab Team, BioME/UFRN · powered by ProDy and MDAnalysis</p>
+    </footer>
+
+    <script src="{{ url_for('static', filename='script.js') }}"></script>
+</body>
+
+</html>

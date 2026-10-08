@@ -1,0 +1,52 @@
+Bootstrap: docker
+From: docker.io/library/python:3.12-slim
+
+# Same environment as the Dockerfile. Build from the repository root:
+#   apptainer build roc.sif Apptainer.def
+
+%labels
+    Title The Room of Conformations
+    Source https://github.com/jpmslima/RoC
+    Vendor EvoMol-Lab, BioME, UFRN
+    License MIT
+
+%help
+    Web interface (http://localhost:5050). The image is read-only, so jobs go to a
+    writable host directory bound to /opt/roc/roc_jobs:
+        mkdir -p roc_jobs
+        apptainer run --bind roc_jobs:/opt/roc/roc_jobs roc.sif
+
+    Command line (results in the current directory):
+        apptainer run --app cli roc.sif structure.pdb --outdir results [options]
+
+%files
+    requirements.txt /opt/roc/requirements.txt
+    roc.py /opt/roc/roc.py
+    RoCGUI.py /opt/roc/RoCGUI.py
+    DOCUMENTATION.md /opt/roc/DOCUMENTATION.md
+    README.md /opt/roc/README.md
+    LICENSE.txt /opt/roc/LICENSE.txt
+    templates /opt/roc/templates
+    static /opt/roc/static
+
+%post
+    export PIP_NO_CACHE_DIR=1 PIP_DISABLE_PIP_VERSION_CHECK=1
+    python -m venv /opt/venv
+    /opt/venv/bin/pip install -r /opt/roc/requirements.txt openmm==8.6.1 pdbfixer==1.12.0
+    mkdir -p /opt/roc/roc_jobs
+    chmod 777 /opt/roc/roc_jobs
+
+%environment
+    export PATH=/opt/venv/bin:$PATH
+    export LC_ALL=C.UTF-8
+    export PYTHONUNBUFFERED=1
+    export PYTHONDONTWRITEBYTECODE=1
+    export ROC_HOST=0.0.0.0
+    export ROC_PORT=5050
+    export ROC_JOBS_DIR=/opt/roc/roc_jobs
+
+%runscript
+    exec python /opt/roc/RoCGUI.py "$@"
+
+%apprun cli
+    exec python /opt/roc/roc.py "$@"

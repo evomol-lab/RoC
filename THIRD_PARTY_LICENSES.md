@@ -40,22 +40,6 @@ Permission is hereby granted, free of charge, to any person obtaining a copy of 
 
 The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
 
-### Pillow (PIL Fork)
-
-- **License:** Historical Permission Notice and Disclaimer (HPND)
-
-- **Copyright:** (c) 1997-2011 by Secret Labs AB, (c) 1995-2011 by Fredrik Lundh
-
-The Python Imaging Library (PIL) is
-
-Copyright © 1997-2011 by Secret Labs AB
-
-Copyright © 1995-2011 by Fredrik Lundh
-
-By obtaining, using, and/or copying this software and/or its associated documentation, you agree that you have read, understood, and will comply with the following terms and conditions:
-
-Permission to use, copy, modify, and distribute this software and its associated documentation for any purpose and without fee is hereby granted, provided that the above copyright notice appears in all copies, and that both that copyright notice and this permission notice appear in supporting documentation, and that the name of Secret Labs AB or the author not be used in advertising or publicity pertaining to distribution of the software without specific, written prior permission.
-
 ### PyInstaller
 
 - **License:** GNU General Public License v2.0 (GPL-2.0) with a special "bootloader exception".
@@ -63,3 +47,16 @@ Permission to use, copy, modify, and distribute this software and its associated
 - **Copyright:** (c) 2013-2022, PyInstaller Development Team.
 
 PyInstaller is licensed under the GPL license, but with a special exception that allows you to distribute your bundled application under your own license. The programs created by PyInstaller are not considered derivative works of PyInstaller.
+
+### Libraries used by RoC 2.x (web interface)
+
+| Library | Role | License |
+|---|---|---|
+| NumPy | numerics | BSD 3-Clause |
+| SciPy | eigensolvers, k-d trees, clustering | BSD 3-Clause |
+| Flask / Werkzeug | web server | BSD 3-Clause |
+| 3Dmol.js (loaded from a CDN) | 3D viewer | BSD 3-Clause |
+| Plotly.js (loaded from a CDN) | charts | MIT |
+| marked (loaded from a CDN) | Markdown rendering of the documentation | MIT |
+| OpenMM (optional, ClustENM) | energy minimisation | MIT and LGPL |
+| PDBFixer (optional, ClustENM) | adds hydrogens and missing atoms | MIT |
