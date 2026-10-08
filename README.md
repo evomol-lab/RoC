@@ -24,7 +24,7 @@ resulting models are. It is a local, open replacement for web servers such as
 
 Developed by the EvoMol-Lab - [BioME](http://bioinfo.imd.ufrn.br) - [UFRN](https://ufrn.br/en).
 
-## What's new in 2.0
+## What's new in 1.1
 
 - **Web interface** (Flask, in the style of [Sauron](https://github.com/jpmslima/Sauron)) with
   progress, cancellation, interactive charts and 3D viewers (3Dmol.js), plus a command line.
