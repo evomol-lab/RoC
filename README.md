@@ -24,26 +24,16 @@ resulting models are. It is a local, open replacement for web servers such as
 
 Developed by the EvoMol-Lab - [BioME](http://bioinfo.imd.ufrn.br) - [UFRN](https://ufrn.br/en).
 
-## What's new in 1.1
+## What's new in 2.0.0
 
-- **Web interface** (Flask, in the style of [Sauron](https://github.com/jpmslima/Sauron)) with
-  progress, cancellation, interactive charts and 3D viewers (3Dmol.js), plus a command line.
-- **Correct all-atom reconstruction.** RoC 1.x moved only the C-alpha atoms: all other atoms stayed
-  at their input positions, so backbone bonds were stretched by several ångströms (N–CA up to 7.7 Å
-  in the example ensemble). Every residue is now moved as a rigid body; ensembles made with 1.x
-  should be regenerated.
-- **Three network models**: C-alpha ANM (uniform or structure-based springs), RTB with rigid
-  residues or secondary-structure blocks on all heavy atoms, and ProDy's ClustENM with OpenMM
-  energy minimisation (optional). GNM is used to check the network against B-factors and to find
-  hinges.
-- **Help with the number of modes**: share of the fluctuation, collectivity of each mode, mobility
-  profiles, a mode explorer that animates every mode, and, given a second conformation of the same
-  protein, the overlap of the modes with the real conformational change.
-- **Ligands and ions** are recognised, listed with their pockets, and either follow their binding
-  site, become part of the network, or are removed. mmCIF input, ions named `CA`, insertion codes,
-  modified residues, nucleic acids and multi-model files are handled.
-- **Quality report and analysis**: peptide-bond deviations, new steric overlaps, RMSD, RMSF, radius
-  of gyration, pairwise RMSD with cluster representatives, Ramachandran plot.
+The **Room of Conformations** has a new web interface!
+
+**- Web interface** (Flask, in the style of [Sauron](https://github.com/evomol-lab/Sauron)) with progress, cancellation, interactive charts, and 3D viewers (3Dmol.js), plus a command line.
+**- Correct all-atom reconstruction.** RoC 1.x moved only the C-alpha atoms; all other atoms stayed at their input positions, so backbone bonds stretched by several Å (N–CA up to 7.7 Å in the example ensemble). Every residue is now moved as a rigid body; regenerate ensembles made with 1.x.
+**- Three network models:** C-alpha ANM (uniform or structure-based springs), RTB with rigid residues or secondary-structure blocks on all heavy atoms, and ProDy's ClustENM with OpenMM energy minimization (optional). GNM checks the network against B-factors and finds hinges.
+**- Help with the number of modes:** share of the fluctuation, collectivity of each mode, mobility profiles, a mode explorer that animates every mode, and, given a second conformation of the same protein, the overlap of the modes with the real conformational change.
+**- Ligands and ions are recognized**, listed with their pockets, and either follow their binding site, become part of the network, or are removed. The system handles mmCIF input, ions named CA, insertion codes, modified residues, nucleic acids, and multi-model files.
+**-Quality report and analysis:** peptide-bond deviations, new steric overlaps, RMSD, RMSF, radius of gyration, pairwise RMSD with cluster representatives, Ramachandran plot.
 
 ## Screenshots
 
