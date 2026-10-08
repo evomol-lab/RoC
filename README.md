@@ -101,9 +101,6 @@ mkdir -p roc_jobs && apptainer run --bind roc_jobs:/opt/roc/roc_jobs roc.sif   #
 To build the image yourself: `podman build -t roc .` (or `docker build`), or
 `apptainer build roc.sif Apptainer.def`.
 
-**Google Colab:** you can also use our Google Colab notebook
-[HERE](https://colab.research.google.com/drive/1jd3qgAZPF9bWxlcCjYURpFQAEYW102Y5?usp=sharing).
-
 ## How it works
 
 1. **Network (ProDy).** The structure is read (PDB or mmCIF), waters are removed and every residue
@@ -129,20 +126,6 @@ structure; with a second conformation (e.g. apo and holo forms) it shows directl
 the real change needs. For adenylate kinase (4AKE → 1AKE), mode 1 alone has an overlap of 0.80
 with the closure and 10 modes reach 0.97. Details in [DOCUMENTATION.md](DOCUMENTATION.md#how-many-modes).
 
-## Building a standalone executable
-
-```
-pip install pyinstaller
-pyinstaller RoCGUI.spec
-```
-
-The executable is written to `dist/`; it starts the server and opens the browser. The ClustENM
-method is not bundled (it needs OpenMM). Publish executables as GitHub releases rather than
-committing them (`build/` and `dist/` are ignored by git).
-
-The previous desktop application (Tkinter, RoC 1.x) was removed in 2.0 because of the
-reconstruction problem described above; it remains in the git history.
-
 ## Citing
 
 If you use **The Room of Conformations** in your published research, please cite this repository.
@@ -154,9 +137,9 @@ Please also cite the libraries and methods that make it possible:
   37:3657–3659.
 - **MDAnalysis:** Michaud-Agrawal N, Denning EJ, Woolf TB, Beckstein O (2011) *J Comput Chem*
   32:2319–2327; Gowers RJ *et al.* (2016) *Proc 15th Python in Science Conf*, 98–105.
-- **ANM:** Atilgan AR *et al.* (2001) *Biophys J* 80:505–515. **RTB:** Tama F *et al.* (2000)
-  *Proteins* 41:1–7. **ClustENM:** Kurkcuoglu Z, Bahar I, Doruker P (2016) *J Chem Theory Comput*
-  12:4549–4562.
+- **ANM:** Atilgan AR *et al.* (2001) *Biophys J* 80:505–515. 
+- **RTB:** Tama F *et al.* (2000) *Proteins* 41:1–7. 
+- **ClustENM:** Kurkcuoglu Z, Bahar I, Doruker P (2016) *J Chem Theory Comput* 12:4549–4562.
 
 The full list of references is in [DOCUMENTATION.md](DOCUMENTATION.md#references).
 
