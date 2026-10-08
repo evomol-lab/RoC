@@ -86,13 +86,20 @@ python roc.py apo.pdb --outdir results --analyze-only --target holo.pdb
 python roc.py --help
 ```
 
-**Containers:**
+**Containers:** the image is published on Docker Hub as
+[`evomol/roc`](https://hub.docker.com/r/evomol/roc) (works with Docker or Podman):
 
 ```
-podman build -t roc .                      # or docker build
-podman run --rm -p 5050:5050 roc           # web interface on http://localhost:5050
-apptainer build roc.sif Apptainer.def
+docker run --rm -p 5050:5050 docker.io/evomol/roc:2.0.0           # web interface on http://localhost:5050
+docker run --rm -p 5050:5050 -v "$PWD/roc_jobs":/opt/roc/roc_jobs docker.io/evomol/roc:2.0.0   # keep the jobs
+docker run --rm -v "$PWD":/data -w /data docker.io/evomol/roc:2.0.0 \
+    python /opt/roc/roc.py structure.pdb --outdir results      # command line
+apptainer build roc.sif docker://evomol/roc:2.0.0               # HPC clusters
+mkdir -p roc_jobs && apptainer run --bind roc_jobs:/opt/roc/roc_jobs roc.sif   # jobs need a writable folder
 ```
+
+To build the image yourself: `podman build -t roc .` (or `docker build`), or
+`apptainer build roc.sif Apptainer.def`.
 
 **Google Colab:** you can also use our Google Colab notebook
 [HERE](https://colab.research.google.com/drive/1jd3qgAZPF9bWxlcCjYURpFQAEYW102Y5?usp=sharing).
